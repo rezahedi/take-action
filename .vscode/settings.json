@@ -1,0 +1,16 @@
+{
+  // Use Biome only for this project
+  "editor.defaultFormatter": "biomejs.biome",
+
+  // Auto-format on save (like Prettier)
+  "editor.formatOnSave": true,
+
+  // Optional: Enable code actions (organize imports, fix lint errors)
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.organizeImports.biome": "always"
+  },
+
+  // 🔒 Disable Prettier in this workspace
+  "prettier.enable": false
+}
