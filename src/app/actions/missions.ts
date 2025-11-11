@@ -2,6 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import db from "@/db";
+import { authorizeUserToEditMission } from "@/db/authz";
 import { missions } from "@/db/schema";
 import { stackServerApp } from "@/stack/server";
 
@@ -24,17 +25,24 @@ export async function createMission(data: CreateMissionInput) {
     throw new Error("Unauthorized");
   }
 
-  const response = await db.insert(missions).values({
-    title: data.title,
-    content: data.content,
-    slug: Date.now().toString(),
-    published: true,
-    authorId: user.id,
-  }).returning({ insertedId: missions.id });
+  const response = await db
+    .insert(missions)
+    .values({
+      title: data.title,
+      content: data.content,
+      slug: Date.now().toString(),
+      published: true,
+      authorId: user.id,
+    })
+    .returning({ insertedId: missions.id });
 
-  if(response.length!==1) return { success: false, message: `Couldn't create the mission`}
+  if (response.length !== 1)
+    return { success: false, message: `Couldn't create the mission` };
 
-  return { success: true, message: `Mission with ID ${response[0].insertedId} created` };
+  return {
+    success: true,
+    message: `Mission with ID ${response[0].insertedId} created`,
+  };
 }
 
 export async function updateMission(id: string, data: UpdateMissionInput) {
@@ -42,6 +50,9 @@ export async function updateMission(id: string, data: UpdateMissionInput) {
   if (!user) {
     throw new Error("Unauthorized");
   }
+
+  if (!authorizeUserToEditMission(user.id, Number(id)))
+    throw new Error("Forbidden");
 
   await db
     .update(missions)
@@ -60,7 +71,7 @@ export async function deleteMission(id: string) {
     throw new Error("Unauthorized");
   }
 
-  await db.delete(missions).where(eq(missions.id, Number(id)))
+  await db.delete(missions).where(eq(missions.id, Number(id)));
 
   return { success: true, message: `Mission ${id} deleted` };
 }
