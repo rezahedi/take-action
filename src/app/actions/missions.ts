@@ -1,5 +1,8 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import db from "@/db";
+import { missions } from "@/db/schema";
 import { stackServerApp } from "@/stack/server";
 
 export type CreateMissionInput = {
@@ -21,20 +24,34 @@ export async function createMission(data: CreateMissionInput) {
     throw new Error("Unauthorized");
   }
 
-  console.log("Creating mission", data);
+  const response = await db.insert(missions).values({
+    title: data.title,
+    content: data.content,
+    slug: Date.now().toString(),
+    published: true,
+    authorId: user.id,
+  }).returning({ insertedId: missions.id });
 
-  return { success: true, message: "Mission created" };
+  if(response.length!==1) return { success: false, message: `Couldn't create the mission`}
+
+  return { success: true, message: `Mission with ID ${response[0].insertedId} created` };
 }
 
-export async function updateMission(_id: string, data: UpdateMissionInput) {
+export async function updateMission(id: string, data: UpdateMissionInput) {
   const user = await stackServerApp.getUser();
   if (!user) {
     throw new Error("Unauthorized");
   }
 
-  console.log("Updating mission", data);
+  await db
+    .update(missions)
+    .set({
+      title: data.title,
+      content: data.content,
+    })
+    .where(eq(missions.id, Number(id)));
 
-  return { success: true, message: "Mission updated" };
+  return { success: true, message: `Mission ${id} deleted` };
 }
 
 export async function deleteMission(id: string) {
@@ -43,7 +60,7 @@ export async function deleteMission(id: string) {
     throw new Error("Unauthorized");
   }
 
-  console.log("Deleting mission", id);
+  await db.delete(missions).where(eq(missions.id, Number(id)))
 
-  return { success: true, message: "Mission deleted" };
+  return { success: true, message: `Mission ${id} deleted` };
 }
