@@ -6,7 +6,7 @@ import * as schema from "@/db/schema";
 
 assert(process.env.DATABASE_URL, "You need a DATABASE_RUL");
 
-const sql = neon(process.env.DATABASE_URL);
+export const sql = neon(process.env.DATABASE_URL);
 const db = drizzle(sql, { schema });
 
 export default db;
