@@ -33,6 +33,7 @@ export async function createMission(data: CreateMissionInput) {
       slug: Date.now().toString(),
       published: true,
       authorId: user.id,
+      imageUrl: data.imageUrl ?? undefined,
     })
     .returning({ insertedId: missions.id });
 
@@ -59,6 +60,7 @@ export async function updateMission(id: string, data: UpdateMissionInput) {
     .set({
       title: data.title,
       content: data.content,
+      imageUrl: data.imageUrl ?? undefined,
     })
     .where(eq(missions.id, Number(id)));
 
