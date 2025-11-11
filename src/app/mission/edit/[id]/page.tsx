@@ -1,3 +1,4 @@
+import MissionEditor from "@/components/MissionEditor";
 import { stackServerApp } from "@/stack/server";
 
 interface ViewMissionPageProps {
@@ -9,7 +10,11 @@ const EditMissionPage = async ({ params }: ViewMissionPageProps) => {
   await stackServerApp.getUser({ or: "redirect" });
   const { id } = await params;
 
-  return <div>Mission {id}</div>;
+  return (
+    <div>
+      <MissionEditor missionId={id} />
+    </div>
+  );
 };
 
 export default EditMissionPage;
