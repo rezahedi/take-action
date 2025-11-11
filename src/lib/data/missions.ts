@@ -23,6 +23,7 @@ export async function getMissionById(id: number) {
       id: missions.id,
       title: missions.title,
       content: missions.content,
+      imageUrl: missions.imageUrl,
       author: usersSync.name,
       createdAt: missions.createdAt,
     })
@@ -30,5 +31,5 @@ export async function getMissionById(id: number) {
     .where(eq(missions.id, id))
     .leftJoin(usersSync, eq(missions.authorId, usersSync.id));
 
-  return response[0];
+  return response[0] ? response[0] : null;
 }
