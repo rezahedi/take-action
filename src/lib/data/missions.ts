@@ -31,6 +31,6 @@ enjoy!`,
 }
 
 export function getMissionById(id: number) {
-  const articles = getMissions();
-  return articles.find((a) => +a.id === id) || null;
+  const missions = getMissions();
+  return missions.find((a) => +a.id === id) || null;
 }

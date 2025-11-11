@@ -1,10 +1,15 @@
 "use client";
 
+import MDEditor from "@uiw/react-md-editor";
 import { Upload, X } from "lucide-react";
+import type React from "react";
 import { useState } from "react";
 import { createMission, updateMission } from "@/app/actions/missions";
 import { uploadFile } from "@/app/actions/upload";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface MissionEditorProps {
   initialTitle?: string;
@@ -90,14 +95,14 @@ export default function MissionEditor({
 
       if (isEditing && missionId) {
         await updateMission(missionId, payload);
-        alert("Article updated (stub)");
+        alert("Mission updated (stub)");
       } else {
         await createMission(payload);
-        alert("Article created (stub)");
+        alert("Mission created (stub)");
       }
     } catch (err) {
-      console.error("Error submitting article:", err);
-      alert("Failed to submit article");
+      console.error("Error submitting mission:", err);
+      alert("Failed to submit mission");
     } finally {
       setIsSubmitting(false);
     }
@@ -130,108 +135,154 @@ export default function MissionEditor({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title Section */}
-        <div>
-          <label htmlFor="title">Title *</label>
-          <input
-            id="title"
-            type="text"
-            placeholder="Enter article title..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={errors.title ? "border-destructive" : ""}
-          />
-          {errors.title && <p className="text-destructive">{errors.title}</p>}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Mission Title</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                type="text"
+                placeholder="Enter mission title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={errors.title ? "border-destructive" : ""}
+              />
+              {errors.title && (
+                <p className="text-sm text-destructive">{errors.title}</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Content Section */}
-        <div>
-          <label htmlFor="content">Content *</label>
-          <div className={errors.content ? "border-destructive" : ""}>
-            <textarea
-              id="content"
-              placeholder="Write your mission content..."
-              style={{ fontSize: 14, lineHeight: 1.5 }}
-              autoCapitalize="off"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              value={content}
-              className="w-full resize-y"
-              onChange={(val) => setContent(val.target.value || "")}
-            />
-          </div>
-          {errors.content && (
-            <p className="text-sm text-destructive">{errors.content}</p>
-          )}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Mission Content</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="content">Content (Markdown) *</Label>
+              <div
+                className={`border rounded-md ${
+                  errors.content ? "border-destructive" : ""
+                }`}
+              >
+                <MDEditor
+                  value={content}
+                  onChange={(val) => setContent(val || "")}
+                  preview="edit"
+                  hideToolbar={false}
+                  visibleDragbar={false}
+                  textareaProps={{
+                    placeholder: "Write your mission content in Markdown...",
+                    style: { fontSize: 14, lineHeight: 1.5 },
+                    // make these explicit so SSR and client output match exactly
+                    autoCapitalize: "off",
+                    autoComplete: "off",
+                    autoCorrect: "off",
+                    spellCheck: false,
+                  }}
+                />
+              </div>
+              {errors.content && (
+                <p className="text-sm text-destructive">{errors.content}</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* File Upload Section */}
-        <div>
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-            <Upload className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-            <div className="space-y-2">
-              <label htmlFor="file-upload">Click to upload files</label>
-              <p className="text-xs text-muted-foreground">
-                Upload images, documents, or other files to attach to your
-                article
-              </p>
-            </div>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              onChange={handleFileUpload}
-              className="sr-only"
-            />
-          </div>
-
-          {/* Display uploaded files */}
-          {files.length > 0 && (
-            <div>
-              <label htmlFor="file-upload">Uploaded Files:</label>
-              <div>
-                {files.map((file, index) => (
-                  <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: the order won't change
-                    key={index}
+        <Card>
+          <CardHeader>
+            <CardTitle>Attachments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="file-upload"
+                    className="cursor-pointer text-sm font-medium"
                   >
-                    <div>
-                      <span>{file.name}</span>
-                      <span>({(file.size / 1024).toFixed(1)} KB)</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X />
-                    </Button>
-                  </div>
-                ))}
+                    Click to upload files
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Upload images, documents, or other files to attach to your
+                    mission
+                  </p>
+                </div>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="sr-only"
+                />
               </div>
+
+              {/* Display uploaded files */}
+              {files.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Uploaded Files:</Label>
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: the order won't change
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-muted rounded-md"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">
+                            {file.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Action Buttons */}
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="min-w-[100px]"
-          >
-            {isSubmitting ? "Saving..." : "Save Mission"}
-          </Button>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="min-w-[100px]"
+              >
+                {isSubmitting ? "Saving..." : "Save Mission"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </div>
   );

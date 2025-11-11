@@ -1,4 +1,12 @@
 import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface MissionCardProps {
   title: string;
@@ -16,26 +24,26 @@ export function MissionCard({
   href,
 }: MissionCardProps) {
   return (
-    <article>
-      <header className="pb-2">
+    <Card>
+      <CardHeader className="pb-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{author}</span>
           <span>•</span>
           <span>{date}</span>
         </div>
-        <h3 className="text-lg">{title}</h3>
-      </header>
-      <main className="py-0">
-        <p>{summary}</p>
-      </main>
-      <footer className="pt-2">
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="py-0">
+        <CardDescription>{summary}</CardDescription>
+      </CardContent>
+      <CardFooter className="pt-2">
         <Link
           href={href}
           className="text-blue-600 hover:underline text-sm font-medium w-fit"
         >
           Read mission &rarr;
         </Link>
-      </footer>
-    </article>
+      </CardFooter>
+    </Card>
   );
 }
