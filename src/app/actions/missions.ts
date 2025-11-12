@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import summarizeMission from "@/ai/summarize";
 import redis from "@/cache";
 import db from "@/db";
 import { authorizeUserToEditMission } from "@/db/authz";
@@ -26,6 +27,7 @@ export async function createMission(data: CreateMissionInput) {
     throw new Error("Unauthorized");
   }
 
+  const summary = await summarizeMission(data.title || "", data.content || "");
   const response = await db
     .insert(missions)
     .values({
@@ -35,6 +37,7 @@ export async function createMission(data: CreateMissionInput) {
       published: true,
       authorId: user.id,
       imageUrl: data.imageUrl ?? undefined,
+      summary,
     })
     .returning({ insertedId: missions.id });
 
@@ -58,12 +61,14 @@ export async function updateMission(id: string, data: UpdateMissionInput) {
   if (!authorizeUserToEditMission(user.id, Number(id)))
     throw new Error("Forbidden");
 
+  const summary = await summarizeMission(data.title || "", data.content || "");
   await db
     .update(missions)
     .set({
       title: data.title,
       content: data.content,
       imageUrl: data.imageUrl ?? undefined,
+      summary: summary ?? undefined,
     })
     .where(eq(missions.id, Number(id)));
 
