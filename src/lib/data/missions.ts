@@ -1,9 +1,17 @@
 import { eq } from "drizzle-orm";
 import { usersSync } from "drizzle-orm/neon";
+import redis from "@/cache";
 import db from "@/db";
 import { missions } from "@/db/schema";
 
 export async function getMissions() {
+  const cached = await redis.get("missions:all");
+  if (cached) {
+    console.log("Get missions cache hit!");
+    return cached;
+  }
+  console.log("Get missions cache miss!");
+
   const response = await db
     .select({
       id: missions.id,
@@ -14,6 +22,11 @@ export async function getMissions() {
     })
     .from(missions)
     .leftJoin(usersSync, eq(missions.authorId, usersSync.id));
+
+  await redis.set("missions:all", response, {
+    ex: 60,
+  });
+
   return response;
 }
 
