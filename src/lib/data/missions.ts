@@ -4,8 +4,17 @@ import redis from "@/cache";
 import db from "@/db";
 import { missions } from "@/db/schema";
 
-export async function getMissions() {
-  const cached = await redis.get("missions:all");
+export type MissionList = {
+  id: number;
+  title: string;
+  summary: string | null;
+  author: string | null;
+  imageUrl?: string | null;
+  createdAt: string;
+};
+
+export async function getMissions(): Promise<MissionList[]> {
+  const cached: MissionList[] | null = await redis.get("missions:all");
   if (cached) {
     console.log("Get missions cache hit!");
     return cached;
@@ -16,8 +25,9 @@ export async function getMissions() {
     .select({
       id: missions.id,
       title: missions.title,
-      content: missions.content,
+      summary: missions.summary,
       author: usersSync.name,
+      imageUrl: missions.imageUrl,
       createdAt: missions.createdAt,
     })
     .from(missions)
@@ -30,12 +40,23 @@ export async function getMissions() {
   return response;
 }
 
+export type MissionWithAuthor = {
+  id: number;
+  title: string;
+  content: string;
+  summary: string;
+  createdAt: string;
+  imageUrl?: string | null;
+  author: string | null;
+};
+
 export async function getMissionById(id: number) {
   const response = await db
     .select({
       id: missions.id,
       title: missions.title,
       content: missions.content,
+      summary: missions.summary,
       imageUrl: missions.imageUrl,
       author: usersSync.name,
       createdAt: missions.createdAt,
