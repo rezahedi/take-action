@@ -6,21 +6,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { incrementPageview } from "@/app/actions/pageviews";
+import ActionsViewer from "@/components/ActionsViewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-interface ViewerMission {
-  title: string;
-  author: string | null;
-  id: number;
-  content: string;
-  createdAt: string;
-  imageUrl?: string | null;
-}
+import type { MissionWithDetail } from "@/lib/data/missions";
 
 interface MissionViewerProps {
-  mission: ViewerMission;
+  mission: MissionWithDetail;
   canEdit?: boolean;
 }
 
@@ -211,6 +204,8 @@ export default function MissionViewer({
           </div>
         </CardContent>
       </Card>
+
+      <ActionsViewer actions={mission.actions} />
 
       {/* Footer Actions */}
       <div className="mt-8 flex justify-between items-center">
