@@ -36,7 +36,7 @@ export const actions = pgTable("actions", {
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
 });
 
-export const actionStats = pgTable("actionStats", {
+export const actionStats = pgTable("action_stats", {
   id: serial("id").primaryKey(),
   actionId: integer("action_id")
     .notNull()
