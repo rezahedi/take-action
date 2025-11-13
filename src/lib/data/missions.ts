@@ -54,6 +54,8 @@ export type MissionWithDetail = {
 export async function getMissionById(
   id: number,
 ): Promise<MissionWithDetail | null> {
+  const user = await stackServerApp.getUser();
+
   const response = await db
     .select({
       id: missions.id,
@@ -68,6 +70,7 @@ export async function getMissionById(
       actionTitle: actions.title,
       actionContent: actions.content,
       actionCount: sql<number>`COUNT(${actionStats.id})`.as("action_count"),
+      actionMarked: sql<boolean>`SUM(CASE WHEN ${actionStats.userId}=${user?.id || ""} THEN 1 ELSE 0 END) > 0`,
     })
     .from(missions)
     .where(eq(missions.id, id))
@@ -88,6 +91,7 @@ export async function getMissionById(
         title: r.actionTitle || "",
         content: r.actionContent || "",
         count: r.actionCount,
+        isMarked: r.actionMarked,
       })),
   };
 
