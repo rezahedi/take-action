@@ -3,6 +3,7 @@ import { usersSync } from "drizzle-orm/neon";
 import redis from "@/cache";
 import db from "@/db";
 import { actionStats, actions, missions } from "@/db/schema";
+import { stackServerApp } from "@/stack/server";
 
 export type MissionList = {
   id: number;
@@ -48,7 +49,15 @@ export type MissionWithDetail = {
   createdAt: string;
   imageUrl?: string | null;
   author: string | null;
-  actions: { id: number; title: string; content: string; count: number }[];
+  actions: MissionAction[];
+};
+
+export type MissionAction = {
+  id: number;
+  title: string;
+  content: string;
+  count: number;
+  isMarked: boolean;
 };
 
 export async function getMissionById(
